@@ -1,15 +1,16 @@
+
 # LogNotifier.Library
 
-## Hướng dẫn cấu hình
+## Configuration Guide
 
-### 1. Cấu hình trong `appsettings.json`
+### 1. Configuration in `appsettings.json`
 
-Thêm vào file `appsettings.json` của bạn đoạn cấu hình sau (tùy chọn Telegram hoặc Discord, hoặc cả hai):
+Add the following section to your `appsettings.json` file (you can configure either Telegram, Discord, or both):
 
 ```json
 {
   "Logging": {
-    "LogChannel": "Discord", // hoặc "Telegram"
+    "LogChannel": "Discord", // or "Telegram"
     "Discord": {
       "WebhookUrl": "https://discord.com/api/webhooks/xxxx/xxxx"
     },
@@ -21,56 +22,60 @@ Thêm vào file `appsettings.json` của bạn đoạn cấu hình sau (tùy ch�
 }
 ```
 
-- `LogChannel`: Chọn `"Discord"` hoặc `"Telegram"` để ưu tiên kênh gửi log.
-- `Discord:WebhookUrl`: Webhook URL của Discord.
-- `Telegram:BotToken`: Token bot Telegram.
-- `Telegram:ChatId`: Chat ID nhận log.
+- `LogChannel`: Choose `"Discord"` or `"Telegram"` as the preferred channel for sending logs.
+- `Discord:WebhookUrl`: Discord Webhook URL.
+- `Telegram:BotToken`: Telegram bot token.
+- `Telegram:ChatId`: Chat ID to receive logs.
 
 ---
 
-### 2. Cấu hình trong `Program.cs`
+### 2. Configuration in `Program.cs`
 
-Thêm các dòng sau vào `Program.cs` (hoặc nơi bạn cấu hình DI):
+Add the following lines to your `Program.cs` (or wherever you configure Dependency Injection):
 
 ```csharp
 using LogNotifier.Library;
 using Serilog;
 
-// ... các using khác
+// ... other using statements
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Thêm cấu hình LogNotifier vào DI
+// Register LogNotifier in DI
 builder.Services.AddLogNotifiers();
 
-// Cấu hình Serilog sử dụng LogNotifier
+// Configure Serilog to use LogNotifier
 builder.Host.UseSerilog((context, services, configuration) =>
 {
     var notifier = services.GetRequiredService<ILogNotifier>();
     configuration
         .ReadFrom.Configuration(context.Configuration)
-        .WriteTo.Notifier(notifier); // Gửi log lỗi qua LogNotifier
+        .WriteTo.Notifier(notifier); // Send error logs via LogNotifier
 });
 
-// ... các cấu hình khác
+// ... other configurations
 
 var app = builder.Build();
 
-// ... các middleware, endpoint, v.v.
+// ... middleware, endpoints, etc.
 
 app.Run();
 ```
 
 ---
 
-### 3. Lưu ý
+### 3. Notes
 
-- Thư viện này chỉ gửi log có cấp độ **Error** trở lên.
-- Đảm bảo đã cài đặt các package cần thiết: `Serilog`, `Microsoft.Extensions.DependencyInjection`, `Microsoft.Extensions.Http`, `Microsoft.Extensions.Caching.Memory`.
+- This library only sends logs with **Error** level or higher.
+- Make sure to install the required packages:
+  - `Serilog`
+  - `Microsoft.Extensions.DependencyInjection`
+  - `Microsoft.Extensions.Http`
+  - `Microsoft.Extensions.Caching.Memory`
 
 ---
 
-### Ví dụ tổng thể
+### Full Example
 
 **appsettings.json:**
 ```json
@@ -104,4 +109,4 @@ app.Run();
 
 ---
 
-Nếu bạn cần ví dụ cụ thể hơn hoặc gặp lỗi khi cấu hình, hãy cung cấp chi tiết để mình hỗ trợ thêm! 
+If you need a more detailed example or run into issues during setup, feel free to provide more information for support!
