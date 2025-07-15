@@ -1,112 +1,82 @@
+# 📦 LogNotifier.Library
 
-# LogNotifier.Library
+A .NET library that helps you send logs to messaging channels like **Discord** or **Telegram** via webhook. It's designed for real-time monitoring of system errors and important events.
 
-## Configuration Guide
+---
 
-### 1. Configuration in `appsettings.json`
+## 🚀 Installation
 
-Add the following section to your `appsettings.json` file (you can configure either Telegram, Discord, or both):
+You can install this package directly from [NuGet.org](https://www.nuget.org/packages/LogNotifier.Library):
+
+### Using .NET CLI:
+
+```bash
+dotnet add package LogNotifier.Library
+```
+
+### Using Package Manager:
+
+```powershell
+Install-Package LogNotifier.Library
+```
+
+---
+
+## ⚙️ Configuration (`appsettings.json`)
+
+Add the following section to your `appsettings.json` file:
 
 ```json
 {
   "Logging": {
     "LogChannel": "Discord", // or "Telegram"
     "Discord": {
-      "WebhookUrl": "https://discord.com/api/webhooks/xxxx/xxxx"
+      "WebhookUrl": "https://discord.com/api/webhooks/your_webhook_here"
     },
     "Telegram": {
-      "BotToken": "YOUR_TELEGRAM_BOT_TOKEN",
-      "ChatId": "YOUR_TELEGRAM_CHAT_ID"
+      "BotToken": "your_bot_token",
+      "ChatId": "your_chat_id"
     }
   }
 }
 ```
 
-- `LogChannel`: Choose `"Discord"` or `"Telegram"` as the preferred channel for sending logs.
-- `Discord:WebhookUrl`: Discord Webhook URL.
-- `Telegram:BotToken`: Telegram bot token.
-- `Telegram:ChatId`: Chat ID to receive logs.
-
 ---
 
-### 2. Configuration in `Program.cs`
+## 🧪 Usage
 
-Add the following lines to your `Program.cs` (or wherever you configure Dependency Injection):
+### 1. Register the service in `Program.cs` (or `Startup.cs` depending on your .NET version):
 
 ```csharp
-using LogNotifier.Library;
-using Serilog;
-
-// ... other using statements
-
-var builder = WebApplication.CreateBuilder(args);
-
-// Register LogNotifier in DI
-builder.Services.AddLogNotifiers();
-
-// Configure Serilog to use LogNotifier
-builder.Host.UseSerilog((context, services, configuration) =>
-{
-    var notifier = services.GetRequiredService<ILogNotifier>();
-    configuration
-        .ReadFrom.Configuration(context.Configuration)
-        .WriteTo.Notifier(notifier); // Send error logs via LogNotifier
-});
-
-// ... other configurations
-
-var app = builder.Build();
-
-// ... middleware, endpoints, etc.
-
-app.Run();
+builder.Services.AddLogNotifier(builder.Configuration);
 ```
 
----
+### 2. Use `ILogger` to log messages:
 
-### 3. Notes
+```csharp
+private readonly ILogger<HomeController> _logger;
 
-- This library only sends logs with **Error** level or higher.
-- Make sure to install the required packages:
-  - `Serilog`
-  - `Microsoft.Extensions.DependencyInjection`
-  - `Microsoft.Extensions.Http`
-  - `Microsoft.Extensions.Caching.Memory`
-
----
-
-### Full Example
-
-**appsettings.json:**
-```json
+public HomeController(ILogger<HomeController> logger)
 {
-  "Logging": {
-    "LogChannel": "Discord",
-    "Discord": {
-      "WebhookUrl": "https://discord.com/api/webhooks/xxxx/xxxx"
-    }
-  }
+    _logger = logger;
+}
+
+public IActionResult Index()
+{
+    _logger.LogError("A critical error occurred");
+    return View();
 }
 ```
 
-**Program.cs:**
-```csharp
-using LogNotifier.Library;
-using Serilog;
+---
 
-var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddLogNotifiers();
-builder.Host.UseSerilog((context, services, configuration) =>
-{
-    var notifier = services.GetRequiredService<ILogNotifier>();
-    configuration
-        .ReadFrom.Configuration(context.Configuration)
-        .WriteTo.Notifier(notifier);
-});
-var app = builder.Build();
-app.Run();
-```
+## 📌 Notes
+
+- You can configure it to send logs to both Discord and Telegram simultaneously.
+- Fully supports ASP.NET Core and .NET Console applications.
 
 ---
 
-If you need a more detailed example or run into issues during setup, feel free to provide more information for support!
+## 📚 License
+
+MIT License
