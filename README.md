@@ -1,6 +1,6 @@
 # 📦 LogNotifier.Library
 
-A .NET library that helps you send logs to messaging channels like **Discord** or **Telegram** via webhook. It's designed for real-time monitoring of system errors and important events.
+A lightweight .NET library that sends error logs and critical events to Discord or Telegram using webhooks — without modifying your existing logging setup. Ideal for real-time monitoring and incident alerts in production environments.
 
 ---
 
@@ -47,8 +47,34 @@ Add the following section to your `appsettings.json` file:
 
 ### 1. Register the service in `Program.cs` (or `Startup.cs` depending on your .NET version):
 
+
 ```csharp
-builder.Services.AddLogNotifier(builder.Configuration);
+using LogNotifier.Library;
+using Serilog;
+
+// ... other using statements
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Register LogNotifier in DI
+builder.Services.AddLogNotifiers();
+
+// Configure Serilog to use LogNotifier
+builder.Host.UseSerilog((context, services, configuration) =>
+{
+    var notifier = services.GetRequiredService<ILogNotifier>();
+    configuration
+        .ReadFrom.Configuration(context.Configuration)
+        .WriteTo.Notifier(notifier); // Send error logs via LogNotifier
+});
+
+// ... other configurations
+
+var app = builder.Build();
+
+// ... middleware, endpoints, etc.
+
+app.Run();
 ```
 
 ### 2. Use `ILogger` to log messages:
